@@ -1,5 +1,6 @@
 var http = require('http');
 
+
 var fs = require('fs');
 const PORT = 8080;
 
@@ -12,18 +13,33 @@ function load_album_list(callback){
         return;
       }
 
-      var only_dirs = [];
+  var only_dirs = [];
 
-      for (let i = 0; files && i < files.length; i++){
-        fs.stat('albums/' + files[i], (err, stats) => {
-          if(stats.isDirectory()){
-            only_dirs.push(files[i]);
-          }
-        });
-      }
+
+  var iterator = (index) => {
+    if (index == files.length){
       callback(null, only_dirs);
+        return;
+    }
+
+
+
+        fs.stat('albums/' + files[index], (err, stats) => {
+          if(err){
+            callback(err);
+            return;
+          }
+
+        if (stats.isDirectory()) {
+          only_dirs.push(files[index]);
+        }
+        iterator(index +1);
+      });
+    }
+    iterator(0);
   });
 }
+
 
 function handle_incoming_request(req, res){
   console.log('INCOMING REQUEST: ' + req.method + ' ' + req.url);
